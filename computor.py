@@ -1,34 +1,37 @@
 import sys
 import re
 
-class equation:
-	def __init__(self):
+class expression:
+	def __init__(self, value):
 		self.x = [0, 0, 0]
-	def display(self):
-		print(self.x)
-		#if self.x[0] != 0:
-			#print(f'{self.x[0]:g }')
-			#print(str(self.x[0]) + " * X^" + str(0))
+		i = 0
+		while i < len(value):
+			is_negative = False
+			if value[i] in ['+', '-']:
+				is_negative = value[i] == '-'
+				i += 1
+			if i + 2 > len(value):
+				sys.exit("Invalid expression")
+			v = float(value[i])
+			if value[i + 1] != '*' or len(value[i + 2]) != 3 or value[i + 2][:2] != 'X^':
+				sys.exit("Invalid expression")
+			x = int(value[i + 2][2])
+			if x < 0 or x > 2:
+				sys.exit("Unsupported polynomial degree")
+			self.x[x] = -v if is_negative else v
+			i += 3
 
-def parse_equation(value):
-	e = equation()
-	i = 0
-	while i < len(value):
-		is_negative = False
-		if value[i] in ['+', '-']:
-			is_negative = value[i] == '-'
-			i += 1
-		if i + 2 > len(value):
-			sys.exit("Invalid equation")
-		v = float(value[i])
-		if value[i + 1] != '*' or len(value[i + 2]) != 3 or value[i + 2][:2] != 'X^':
-			sys.exit("Invalid equation")
-		x = int(value[i + 2][2])
-		if x < 0 or x > 2:
-			sys.exit("Unsupported polynomial degree")
-		e.x[x] = -v if is_negative else v
-		i += 3
-	return (e)
+	def display(self):
+		print(f'{self.x[0]:g} * X^0', end="")
+		print(" + " if self.x[1] >= 0 else " - ", end="")
+		print(f'{abs(self.x[1]):g} * X^1', end="")
+		print(" + " if self.x[2] >= 0 else " - ", end="")
+		print(f'{abs(self.x[2]):g} * X^2', end="")
+	
+	def get_degree(self):
+		for i in range(2, -1, -1):
+			if self.x[i] != 0:
+				return (i)
 
 def reduce_equation(left, right):
 	for i in range(3):
@@ -44,10 +47,10 @@ try:
 except ValueError:
 	sys.exit("Missing = operand")
 left, right = values[:equal_pos], values[equal_pos + 1:]
-
-left_equation = parse_equation(left)
-left_equation.display()
-right_equation = parse_equation(right)
-right_equation.display()
-left_reduce = reduce_equation(left_equation, right_equation)
-left_reduce.display()
+if not len(left) or not len(right):
+	sys.exit("Invalid expression")
+left_expression = expression(left)
+if not (len(right) == 1 and int(right[0]) == 0):
+	left_expression = reduce_equation(left_expression, expression(right))
+print("Reduced form: ", end=''); left_expression.display(); print(" = 0")
+print(f'Polynomial degree: {left_expression.get_degree()}')
