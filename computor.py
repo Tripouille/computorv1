@@ -34,13 +34,16 @@ class expression:
 			if self.x[i] != 0:
 				return (i)
 
+
 def reduce_expression(left, right):
 	for i in range(3):
 		left.x[i] -= right.x[i] if right.x[i] > 0 else right.x[i]
 	return (left)
 
+
 def get_discriminant(expression):
 	return (expression.x[1] ** 2 - 4 * expression.x[0] * expression.x[2])
+
 
 def solve_second_degree(e):
 	discriminant = get_discriminant(e)
@@ -50,15 +53,18 @@ def solve_second_degree(e):
 		print((-e.x[1] + squareroot_discriminant) / (2 * e.x[2]))
 		print((-e.x[1] - squareroot_discriminant) / (2 * e.x[2]))
 	elif discriminant == 0:
-		print("The solution is: ")
-		print(-e.x[1] / (2 * e.x[0]))
+		print(f"The solution is: \n{-e.x[1] / (2 * e.x[0])}")
 	else:
 		print("Discriminant is strictly negative, there is no solution.")
 
+
+def solve_one_degree(e):
+	print(f"The solution is: \n{-e.x[0] / e.x[1]}")
+
+
+
 if len(sys.argv) != 2:
 	sys.exit("usage: python computor.py equation")
-
-
 values = re.split(" +", sys.argv[1])
 try:
 	equal_pos = values.index("=")
@@ -75,3 +81,9 @@ degree = left_expression.get_degree()
 print(f'Polynomial degree: {degree}')
 if degree == 2:
 	solve_second_degree(left_expression)
+elif degree == 1:
+	solve_one_degree(left_expression)
+elif degree == 0:
+	print("The solution is: \n0")
+else:
+	print("The solution is: \nAll real numbers.")
