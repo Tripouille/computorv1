@@ -1,5 +1,6 @@
 import sys
 import re
+import math
 
 class expression:
 	def __init__(self, value):
@@ -33,13 +34,30 @@ class expression:
 			if self.x[i] != 0:
 				return (i)
 
-def reduce_equation(left, right):
+def reduce_expression(left, right):
 	for i in range(3):
 		left.x[i] -= right.x[i] if right.x[i] > 0 else right.x[i]
 	return (left)
 
+def get_discriminant(expression):
+	return (expression.x[1] ** 2 - 4 * expression.x[0] * expression.x[2])
+
+def solve_second_degree(e):
+	discriminant = get_discriminant(e)
+	if discriminant > 0:
+		print("Discriminant is strictly positive, the two solutions are:")
+		squareroot_discriminant = math.sqrt(discriminant)
+		print((-e.x[1] + squareroot_discriminant) / (2 * e.x[2]))
+		print((-e.x[1] - squareroot_discriminant) / (2 * e.x[2]))
+	elif discriminant == 0:
+		print("The solution is: ")
+		print(-e.x[1] / (2 * e.x[0]))
+	else:
+		print("Discriminant is strictly negative, there is no solution.")
+
 if len(sys.argv) != 2:
 	sys.exit("usage: python computor.py equation")
+
 
 values = re.split(" +", sys.argv[1])
 try:
@@ -51,6 +69,9 @@ if not len(left) or not len(right):
 	sys.exit("Invalid expression")
 left_expression = expression(left)
 if not (len(right) == 1 and int(right[0]) == 0):
-	left_expression = reduce_equation(left_expression, expression(right))
+	left_expression = reduce_expression(left_expression, expression(right))
 print("Reduced form: ", end=''); left_expression.display(); print(" = 0")
-print(f'Polynomial degree: {left_expression.get_degree()}')
+degree = left_expression.get_degree()
+print(f'Polynomial degree: {degree}')
+if degree == 2:
+	solve_second_degree(left_expression)
