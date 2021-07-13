@@ -1,11 +1,12 @@
 import sys
 import re
-import math
+import decimal
 from fractions import Fraction
+import math
 
 class Polynome:
 	def __init__(self, string):
-		self.x = [0, 0, 0]
+		self.x = [decimal.Decimal(0), decimal.Decimal(0), decimal.Decimal(0)]
 		i = 0
 		string_len = len(string)
 		re_number = re.compile("^[-+]{0,1}\d+(\.\d+){0,1}")
@@ -13,12 +14,12 @@ class Polynome:
 			x = 0
 			match = re_number.match(string[i:])
 			if string[i] == 'X' or string[i:i+2] == "+X" or string[i:i+2] == "-X":
-				value = 1.0 if not string[i:i+2] == "-X" else -1.0
+				value = decimal.Decimal(1.0) if not string[i:i+2] == "-X" else decimal.Decimal(-1.0)
 				i += 1 if not string[i] == 'X' else 0
 			else:
 				if match is None: sys.exit("Error: expecting number but found: " + string[i:])
 				match_end = match.end()
-				value = float(string[i:i + match_end])
+				value = decimal.Decimal(string[i:i + match_end])
 				i += match_end
 			if i < string_len and string[i] == '*':
 				i += 1
@@ -59,14 +60,21 @@ def reduce_polynome(left, right):
 	return (left)
 
 def get_discriminant(polynome):
-	return (polynome.x[1] ** 2 - 4 * polynome.x[0] * polynome.x[2])
+	return (polynome.x[1] * polynome.x[1] - 4 * polynome.x[0] * polynome.x[2])
+
+def sqrt(n): #quadratic convergence 
+	x, prior = decimal.Decimal(n), None
+	while x != prior: 
+		prior = x
+		x = (x + n / x) / 2
+	return (+x)
 
 def solve_second_degree(p):
 	discriminant = get_discriminant(p)
 	print(f"Discriminant: {discriminant}")
 	if discriminant > 0:
 		print("Discriminant is strictly positive, the two solutions are:")
-		squareroot_discriminant = math.sqrt(discriminant)
+		squareroot_discriminant = sqrt(decimal.Decimal(discriminant))
 		print(format_solution((-p.x[1] + squareroot_discriminant) / (2 * p.x[2])))
 		print(format_solution((-p.x[1] - squareroot_discriminant) / (2 * p.x[2])))
 	elif discriminant == 0:
@@ -86,6 +94,7 @@ def format_solution(solution):
 if len(sys.argv) != 2:
 	sys.exit("usage: python computor.py equation")
 
+decimal.getcontext().prec = 16
 expression = sys.argv[1].replace(' ', '')
 try: equal_pos = expression.index('=')
 except ValueError: sys.exit("Error: Missing = operand.")
